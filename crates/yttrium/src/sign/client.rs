@@ -1255,8 +1255,7 @@ impl Client {
 impl Drop for Client {
     fn drop(&mut self) {
         if let Some(cleanup_tx) = self.cleanup_tx.take() {
-            // Just drop the sender - this closes the channel and signals cleanup
-            drop(cleanup_tx);
+            cleanup_tx.cancel();
         } else {
             tracing::warn!("cleanup_tx already taken");
         }
@@ -1265,4 +1264,26 @@ impl Drop for Client {
 
 pub fn generate_client_id_key() -> SecretKey {
     SigningKey::generate(&mut rand::thread_rng()).to_bytes()
+}
+
+#[cfg(test)]
+mod tests {
+    use {super::*, std::time::Duration};
+
+    #[tokio::test]
+    async fn drop_closes_events() {
+        let (mut client, mut events) = Client::new(
+            "00000000000000000000000000000000".into(),
+            generate_client_id_key(),
+            Arc::new(crate::sign::test_helpers::MySessionStore::new()),
+        );
+        client.start();
+        drop(client);
+        assert!(
+            tokio::time::timeout(Duration::from_secs(1), events.recv())
+                .await
+                .expect("client background task did not stop")
+                .is_none()
+        );
+    }
 }

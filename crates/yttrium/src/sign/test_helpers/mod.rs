@@ -32,7 +32,7 @@ struct MySessionStoreInner {
     json_rpc_history: HashMap<ProtocolRpcId, JsonRpcHistoryEntry>,
 }
 
-struct MySessionStore(Arc<Mutex<MySessionStoreInner>>);
+pub(crate) struct MySessionStore(Arc<Mutex<MySessionStoreInner>>);
 
 impl MySessionStore {
     pub fn new() -> Self {
