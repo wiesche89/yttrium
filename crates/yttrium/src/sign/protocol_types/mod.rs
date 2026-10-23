@@ -215,6 +215,7 @@ pub struct Metadata {
 pub struct Redirect {
     pub native: Option<String>,
     pub universal: Option<String>,
+    #[serde(default)]
     pub link_mode: bool,
 }
 
@@ -364,6 +365,16 @@ pub struct GenericJsonRpcResponseErrorData {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn redirect_link_mode() -> Result<(), serde_json::Error> {
+        let redirect: Redirect =
+            serde_json::from_str(r#"{"native":"metamask://"}"#)?;
+        assert!(!redirect.link_mode);
+        let redirect: Redirect = serde_json::from_str(r#"{"linkMode":true}"#)?;
+        assert!(redirect.link_mode);
+        Ok(())
+    }
 
     fn create_minimal_proposal() -> Proposal {
         let mut required_namespaces = HashMap::new();
