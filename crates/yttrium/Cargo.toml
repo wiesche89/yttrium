@@ -342,6 +342,7 @@ urlencoding = "2.1"
 
 [dev-dependencies]
 pay-api = { path = "../pay-api" }
+tracing-subscriber = { version = "0.3.22", default-features = false, features = ["fmt", "std"] }
 
 # mocking
 wiremock = { version = "0.6.0", default-features = false }
